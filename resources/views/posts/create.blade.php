@@ -24,6 +24,7 @@
 
 				{{ Form::label('category_id', 'Category:') }}
 				<select class="form-control" name="category_id">
+					<option value='0'>Select category</option>
 					@foreach($categories as $category)
 						<option value='{{ $category->id }}'>{{ $category->name }}</option>
 					@endforeach

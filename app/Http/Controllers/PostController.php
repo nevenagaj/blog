@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Post;
 use App\Category;
 use Session;
@@ -81,6 +82,11 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::find($id); //find item Post by its id
+        //var_dump($post);
+        //die();
+        //dd($post);
+        //print_r($post);
+        //die();
         return view('posts.show')->withPost($post);
     }
 
@@ -99,9 +105,13 @@ class PostController extends Controller
 
         //find post in db and save as var
         $post = Post::find($id);
-        $categories = Category::pluck('name','id');
+        $categories = Category::all();
+        $cats = [];
+        foreach($categories as $category){
+            $cats[$category->id] = $category->name;
+        }
         //returna view and pass in the var we previeosly created
-        return view('posts.edit')->withPost($post)->withCategory($categories);
+        return view('posts.edit')->withPost($post)->withCategory($cats);
         
 
     }
@@ -120,14 +130,16 @@ class PostController extends Controller
 
         if ($request->input('slug') == $post->slug) {
             $this->validate($request, array(
-                'title' => 'required|max:255',
-                'body'  => 'required'
+                'title'         => 'required|max:255',
+                'category_id'   => 'required|integer',
+                'body'          => 'required'
             ));
         } else {
         $this->validate($request, array(
-                'title' => 'required|max:255',
-                'slug'  => 'required|alpha_dash|min:5|max:255|unique:posts,slug',
-                'body'  => 'required'
+                'title'         => 'required|max:255',
+                'slug'          => 'required|alpha_dash|min:5|max:255|unique:posts,slug',
+                'category_id'   => 'required|integer',
+                'body'          => 'required'
             ));
         }
         // Save the data to the database
@@ -135,6 +147,7 @@ class PostController extends Controller
 
         $post->title = $request->input('title');
         $post->slug = $request->input('slug');
+        $post->category_id = $request->input('category_id');
         $post->body = $request->input('body');
 
         $post->save();

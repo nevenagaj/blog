@@ -14,7 +14,7 @@
 			{{ Form::text('slug', null, ['class' => 'form-control']) }}
 
 			{{ Form::label('category_id', 'Category:', ['class' => 'form-spacing-top']) }}
-			{{ Form::select('category', $categories, null, ['class'=>'form-control']) }}
+			{{ Form::select('category_id', $category, null, ['class'=>'form-control']) }}
 			
 			{{ Form::label('body', "Body:", ['class' => 'form-spacing-top']) }}
 			{{ Form::textarea('body', null, ['class' => 'form-control']) }}

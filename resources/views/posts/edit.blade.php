@@ -2,6 +2,20 @@
 
 @section('title', '| Edit Blog Post')
 
+@section('stylesheets')
+
+	{!! Html::style('css/select2.min.css') !!}
+
+	<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+	<script>
+		tinymce.init({
+			selector: "textarea",  // change this value according to your HTML
+			plugins: "link code"
+		});
+	</script>
+
+@endsection
+
 @section('content')
 
 	<div class="row">
@@ -15,6 +29,9 @@
 
 			{{ Form::label('category_id', 'Category:', ['class' => 'form-spacing-top']) }}
 			{{ Form::select('category_id', $category, null, ['class'=>'form-control']) }}
+
+			{{ Form::label('tags', 'Tags:', ['class' => 'form-spacing-top']) }}
+			{{ Form::select('tags[]', $tag, null, ['class'=>'form-control select2-multi', 'multiple'=>'multiple']) }}
 			
 			{{ Form::label('body', "Body:", ['class' => 'form-spacing-top']) }}
 			{{ Form::textarea('body', null, ['class' => 'form-control']) }}
@@ -47,3 +64,14 @@
 	</div>	<!-- end of .row (form) -->
 
 @stop
+
+@section('scripts')
+
+	{!! Html::script('js/select2.min.js') !!}
+
+	<script type="text/javascript">
+    	$('.select2-multi').select2();
+		$('.select2-multi').select2().val({!! json_encode($post->tags()->allRelatedIds()) !!}).trigger('change');
+	</script>
+
+@endsection

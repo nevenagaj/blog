@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Post;
+use App\Tag;
 use App\Category;
 use Session;
+use Purifier;
 
 class PostController extends Controller
 {
@@ -36,7 +38,8 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('posts.create')->withCategories($categories);
+        $tags = Tag::all();
+        return view('posts.create')->withCategories($categories)->withTags($tags);
     }
 
     /**
@@ -64,9 +67,10 @@ class PostController extends Controller
         $post->title = $request->title;
         $post->slug = $request->slug;
         $post->category_id = $request->category_id;
-        $post->body = $request->body;
+        $post->body = Purifier::clean($request->body);
 
         $post->save();
+        $post->tags()->sync($request->tags, false);
         Session::flash('success', 'The blog post was saved!');
 
         //redirect to another page
@@ -110,8 +114,16 @@ class PostController extends Controller
         foreach($categories as $category){
             $cats[$category->id] = $category->name;
         }
+
+        /*$tags = Tag::all();
+        $tags2 = [];
+        foreach($tags as $tag){
+            $tags2[$tag->id] = $tag->name;
+        }*/
+        $tag= Tag::pluck('name','id')->all();
+
         //returna view and pass in the var we previeosly created
-        return view('posts.edit')->withPost($post)->withCategory($cats);
+        return view('posts.edit')->withPost($post)->withCategory($cats)->withTag($tag);
         
 
     }
@@ -148,9 +160,17 @@ class PostController extends Controller
         $post->title = $request->input('title');
         $post->slug = $request->input('slug');
         $post->category_id = $request->input('category_id');
-        $post->body = $request->input('body');
+        $post->body = Purifier::clean($request->input('body'));
 
         $post->save();
+
+        if(isset($request->tags)){
+            $post->tags()->sync($request->tags);
+        }else{
+            $post->tags()->sync(array());
+        }
+
+        
 
         // set flash data with success message
         Session::flash('success', 'This post was successfully saved.');
@@ -169,6 +189,9 @@ class PostController extends Controller
     {
         //find post to delete
         $post = Post::find($id);
+
+        //sklanja veyu iymedju posta i taga tako da post moye da se obrise bez probleme
+        $post->tags()->detach();
 
         //eloquent metod for delete
         $post->delete();
